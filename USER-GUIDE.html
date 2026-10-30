@@ -1,0 +1,10 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>动筷之前 · 使用指南</title><style>body{font:17px/1.7 system-ui,sans-serif;color:#25251f;background:#faf9f4;margin:0}main{max-width:52rem;margin:auto;padding:2rem}h1,h2{line-height:1.25}code{background:#ecebe4;padding:.1em .3em}a{color:#174d6b}@media print{body{background:white}main{padding:0}}</style></head><body><main>
+<h1>动筷之前</h1><p>本地 Codex 美食摄影创作助手 · 开发候选 · 2026-10-30</p>
+<h2>能做什么</h2><p>给一道菜、照片或想法，探索画面、生成图片、连续修改、选版或策划系列。也可点评照片、指导实拍和进行基础调色裁切。照片是可选输入；请勿提供不愿发送给图像服务的敏感素材。</p>
+<h2>兼容与依赖</h2><p>需要本地 Codex、Python 3、Pillow 和支持 fcntl 的系统；生成需要当前可用的 Codex 原生图像工具。macOS 有限定验证；Linux 未验证，原生 Windows 不承诺兼容。开发校验工具另需 PyYAML。具体最低版本、安装耗时和磁盘需求尚未测定。</p>
+<h2>项目级安装</h2><p>先检查项目中 <code>.agents/skills/before-chopsticks</code> 是否已存在；如存在，先将其完整复制备份。将公开源码中的 <code>development/runtime/before-chopsticks</code> 完整复制到该位置（包括 LICENSE），在项目内开启新 Codex 会话。检查会话能否发现该 Skill；发现与实际完成任务是两项不同验证。</p>
+<h2>无图试用</h2><p>输入：“红烧肉先给几个不同方向，不生图。”预期得到几个具体画面方向及推荐，不触发图像生成。可继续说“第二个故事、第一种光，不要手”。“看第一版”只查看；“回第一版继续”改变后续编辑对象。多道菜各一张不必统一风格。</p>
+<h2>权限、隐私和限制</h2><p>文字策划、点评、实拍指导不自动生图。本地调色与裁切在本地执行；生成和生成式编辑需要可用工具和用户授权，可能消耗账户用量并将提示词、输入图片发送服务端。素材、版本和调用记录保存于所选作品目录；服务端保留规则由服务提供方决定。失败或提交状态未知不会自动重发。没有可满足精确保留要求的工具时说明限制，不能承诺像素不变。</p><p>整图改光一致性、倒液保留、多参考属性解耦、复杂动作及跨题材稳定性有限；作品需逐图复核。完整新会话自动出图链未验证。</p>
+<h2>升级、恢复、卸载</h2><p>升级前备份旧安装，再替换运行目录。回退时移除新安装并恢复备份；独立备份恢复尚未实际演练。卸载仅移除项目级 Skill 目录，作品目录不会自动删除；迁移旧作品数据尚未验证。</p>
+<h2>状态、许可与排障</h2><p>candidate 表示候选仍有未验证项；verified 仅表示明确范围的检查通过；released 指指定范围的发布，不等于所有效果稳定。用户接受作品不等于技术验证通过。</p><p>找不到 Skill 时检查项目路径并重开会话；依赖错误时检查 Python 和 Pillow。反馈问题时提供操作步骤及脱敏错误，不要分享密钥、账户信息或私有作品。当前未指定外部支持渠道。</p><p>本仓库随附 MIT 许可，适用于权利人有权授权的项目内容；第三方内容适用各自许可，MIT 通知不替代第三方授权。候选未发布；通过可信渠道取得的校验和可用于检测文件变化，校验和本身不能证明发布者身份。</p>
+</main></body></html>
