@@ -1,6 +1,6 @@
 # v13 能力清单（2026-10-31）
 
-本清单说明v13开发候选的运行入口、已有验证及限制。运行文件位于仓库的 `development/runtime/before-chopsticks`，具体安装见 [README](README.md)。v13本身不证明已部署到使用者环境，也不代表production-ready。
+本清单说明v13开发候选的运行入口、已有验证及限制，对应提交 `e2adb06`；此后的改动见 [CHANGELOG](CHANGELOG.md)，目前只有一条画幅记录规则和一项对应离线回归。运行文件位于仓库的 `development/runtime/before-chopsticks`，具体安装见 [README](README.md)。v13本身不证明已部署到使用者环境，也不代表production-ready。
 
 **已有验证**分为离线程序/像素检查、模型实际读取后的文字行为、真实图像案例。较早版本的实图与安装记录只在原案例及版本范围内有效；v9/v10/v11文字回归不能拼接成v13完整端到端通过。下表E1—E10为验证摘要编号，文末解释范围；私有原始证据、用户作品和原始调用记录不随本清单提供，未公开的验证摘要不等于读者已能独立复核全部实验。
 
@@ -17,7 +17,7 @@
 | 影调 | [photography](development/runtime/before-chopsticks/references/core/photography.md) P-TONE | E4三档影调文字；E9汇总三档实图及后续画幅/影调文字任务 | 主体、背景与面积须分别看；不同方案连带改变构图的案例不证明参数严格独立控制 |
 | 光质、光向与受光联动 | [photography](development/runtime/before-chopsticks/references/core/photography.md) P-LIGHT、P-CHECK | E6真实复测有主体受光改善，但整体partial/unclear；E4有实际提交遗漏归因文字回归 | 盘内外投影证据仍不足；不承诺整图物理一致性，不由单例推断模型硬上限 |
 | 色彩、冷暖与风格 | [photography](development/runtime/before-chopsticks/references/core/photography.md) P-COLOR；[interaction](development/runtime/before-chopsticks/references/core/interaction.md)「创意探索与图组选择」 | E3有亮调怀旧；E4有光色独立设计；E9汇总原光色样本 | 通用怀旧、年代记忆保留，不绑定暗暖或旧器物；跨风格/题材视觉稳定未证实 |
-| 画幅、取景与清晰范围 | [interaction](development/runtime/before-chopsticks/references/core/interaction.md)单图画幅与影调记录；[photography](development/runtime/before-chopsticks/references/core/photography.md) P-SPACE | E9：FRAME01新建、FRAME02编辑继承各一次隔离正式无图prepare/preview；E2八张实际3:4 | 原生接口无精确尺寸参数；混合画幅、任意比例和机位准确性未普遍验证；目标比例与实图分开 |
+| 画幅、取景与清晰范围 | [interaction](development/runtime/before-chopsticks/references/core/interaction.md)单图画幅与影调记录；[photography](development/runtime/before-chopsticks/references/core/photography.md) P-SPACE | E9：FRAME01新建、FRAME02编辑继承各一次隔离正式无图prepare/preview；E2八张实际3:4 | 原生接口无精确尺寸参数；混合画幅、任意比例和机位准确性未普遍验证；目标比例与实图分开；只说横幅/竖幅时的记录规则在 `751070f` 中修改，E9 未按新规则重跑，另有一次无图准备与一项离线回归 |
 | 动作、人物与露脸选择 | [photography](development/runtime/before-chopsticks/references/core/photography.md)「动作」；[interaction](development/runtime/before-chopsticks/references/core/interaction.md)系列人物规则 | E2有限八张不露脸系列获用户接受，有时序/动作定向修正；E4人物自主设计文字方案 | 用户接受不抹去刀刃时刻、下锅机位偏差；手部不能证明身份连续；不设全局不露脸默认 |
 | 模糊反馈与多项修改 | [interaction](development/runtime/before-chopsticks/references/core/interaction.md)「模糊反馈与连续修改」；[photography](development/runtime/before-chopsticks/references/core/photography.md) P-CHECK | E9 M3限定通过，含真实编辑；E3/E5有反馈和组合文字证据 | 不能保证长时间多轮永不漂移；没有照片时只能提出条件式建议 |
 | 点评 | [photography](development/runtime/before-chopsticks/references/core/photography.md) P-CRITIQUE | E9 M4有实际看图点评；E4有缺图不编造观察的文字回答 | 不能把观察推断当真实灯位/器材鉴定；点评不自动修图或生成 |
@@ -57,7 +57,7 @@
 - **E4｜v9/v10文字回归**：有限任务覆盖影调、改光描述、过程规划、缺图点评和提交遗漏归因；有实际技能读取，不代表隐式发现或新成图验证。
 - **E5｜v11文字回归**：一次隔离会话完成四方向、故事与光混选且去手、三菜独立场景、手机加左窗指导四项任务；不是四次独立会话。
 - **E6｜改光实图复测**：主体受光有改善，整图投影一致性仍记为部分达到/不确定，不升级为整体通过。
-- **E7｜v13离线回归**：整套146项通过，含两项新增清空操作与输入拒绝回归；146不是表中每项各有146例。仓库保留可运行的[测试目录](development/evidence/tests)，其中有[状态与版本测试](development/evidence/tests/test_engine.py)、[本地修图测试](development/evidence/tests/test_local_edits.py)、[锚点绑定测试](development/evidence/tests/test_anchor_binding.py)。运行方式见README；测试使用合成夹具，不调用图像服务。评测定义本身不算执行结果。
+- **E7｜v13离线回归**：整套146项通过，含两项新增清空操作与输入拒绝回归；146不是表中每项各有146例。`751070f` 新增一项画幅方向记录回归，当前共147项。仓库保留可运行的[测试目录](development/evidence/tests)，其中有[状态与版本测试](development/evidence/tests/test_engine.py)、[本地修图测试](development/evidence/tests/test_local_edits.py)、[锚点绑定测试](development/evidence/tests/test_anchor_binding.py)。运行方式见README；测试使用合成夹具，不调用图像服务。评测定义本身不算执行结果。
 - **E8｜三参考场景修正**：指定背景、台面有所改善，但道具材质仍有违例；参考解耦只部分满足。
 - **E9｜较早本地首版限定验收**：包含有限光色、编辑、点评与实拍指导、锚点隔离、分层检查，以及安装后使用和原目录移回恢复。新建和编辑各有一次画幅/影调正式无图准备；独立备份恢复未演练。这些不算v13新安装验收。
 - **E10｜较早正式无图准备**：单次新会话自然发现、读取技能并实际执行prepare/preview；止于准备，没有dispatch或原生图像调用。

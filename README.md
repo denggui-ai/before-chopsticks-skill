@@ -38,7 +38,7 @@ python3 -c 'import PIL, fcntl; print("Python 依赖可用")'
 - “看第一版。”——只查看，不改变后续编辑对象。
 - “回第一版继续。”——从第一版建立后续修改。
 
-两条入口的完整话术、预期结果、升级备份、恢复与卸载见 [Markdown 使用指南](USER-GUIDE.md)；仓库也提供可下载后离线打开的 [HTML 使用指南](USER-GUIDE.html)。卸载 Skill 不会自动删除作品目录；从独立备份恢复尚未实际演练。
+两条入口的完整话术、预期结果、升级备份、恢复与卸载见 [Markdown 使用指南](USER-GUIDE.md)；仓库也提供 [HTML 使用指南](USER-GUIDE.html)，其中指向其他文档的链接需与仓库文件放在一起使用。卸载 Skill 不会自动删除作品目录；从独立备份恢复尚未实际演练。
 
 完整能力、已有验证与未验证限制见 [v13 能力清单](CAPABILITIES-v13.md)。一次真实运行的过程和图片见 [案例](EXAMPLES.md)。
 
@@ -56,4 +56,4 @@ python3 -c 'import PIL, fcntl; print("Python 依赖可用")'
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s development/evidence/tests -q
 ```
 
-开发时修改作者侧 `development/runtime` 与公共文档源，再由精确白名单导出；对公开仓库的修改需要同步回作者源，避免副本漂移。本仓库随附 [MIT 许可](LICENSE)，适用于权利人有权授权的项目内容；第三方内容适用各自许可，MIT 通知不替代第三方授权。案例页图片另以 CC BY 4.0 提供，见 [案例](EXAMPLES.md)。历史研究资料不包含在候选中。
+本仓库由维护者的开发源按精确白名单导出。欢迎直接对本仓库提交 issue 或 PR，被采纳的修改由维护者同步回开发源后再导出，避免两份副本漂移。本仓库随附 [MIT 许可](LICENSE)，适用于权利人有权授权的项目内容；第三方内容适用各自许可，MIT 通知不替代第三方授权。案例页图片另以 CC BY 4.0 提供，见 [案例](EXAMPLES.md)。历史研究资料不包含在候选中。
