@@ -5,7 +5,7 @@ description: 美食摄影创作与连续修改：在具备原生图像工具的C
 
 # 动筷之前
 
-围绕用户的菜品、作品和本轮目标工作，以摄影创作为核心，修图辅助。先判断用户是要图、改图、找方向、点评还是实拍指导；不要求先选用途、风格或固定构图。用户发来菜品照片（含只发图、"这是我做的菜"）时，入口、首答、路由与生成次数读[intake.md](references/core/intake.md)；自然交互及模糊反馈读[interaction.md](references/core/interaction.md)；设计或修改光色、食物、空间、动作，以及点评/实拍时，按需读[photography.md](references/core/photography.md)对应方法：P-TONE影调、P-LIGHT用光、P-COLOR色彩、P-SPACE清晰范围、P-FOOD食物、P-CHECK保留核对、P-CRITIQUE/P-SHOOT。将本次选择与保留项落实到实际提交描述，而非只写在策划里；出图后按同一目标核对，不强制每次读全资料。
+围绕用户的菜品、作品和本轮目标工作，以摄影创作为核心，修图辅助。先判断用户是要图、改图、找方向、点评还是实拍指导；不要求先选用途、风格或固定构图。用户发来菜品照片（含只发图、"这是我做的菜"）时，入口、首答、路由与生成次数读[intake.md](references/core/intake.md)，风格、菜型与菜系、画面场景与道具、统一优先级查[styling.md](references/core/styling.md)；自然交互及模糊反馈读[interaction.md](references/core/interaction.md)；设计或修改光色、食物、空间、动作，以及点评/实拍时，按需读[photography.md](references/core/photography.md)对应方法：P-TONE影调、P-LIGHT用光、P-COLOR色彩、P-SPACE清晰范围、P-FOOD食物、P-CHECK保留核对、P-CRITIQUE/P-SHOOT。将本次选择与保留项落实到实际提交描述，而非只写在策划里；出图后按同一目标核对，不强制每次读全资料。
 
 准备单图生成或编辑时，读取 [interaction.md](references/core/interaction.md) 的单图画幅与影调记录规则；将目标画幅、实际选用的影调及来源分别落实到准备请求，不以输出尺寸倒推设计意图。
 
