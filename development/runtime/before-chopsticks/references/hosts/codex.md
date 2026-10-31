@@ -38,7 +38,7 @@ python3 <skill-dir>/scripts/codex.py --project <project-dir> --input command.jso
 }
 ```
 
-`changes`仅在本轮确有变更时使用，来源按实际填；测试者自选的画面不能冒称用户点名条件。最终payload会附上有效要求，旧设计文字不得覆盖新要求。
+`changes`仅在本轮确有变更时使用，来源按实际填；测试者自选的画面不能冒称用户点名条件。最终payload会附上有效要求，旧设计文字不得覆盖新要求。例外：专用键`画面来源`按[intake.md](../core/intake.md)"需求记录"检查缺失后补写。
 
 用户已经通过`select_label`或`select_version`明确选定后，可设置`operation_type:"generative_edit"`并省略`parent_version_id`，桥在锁内读取当前编辑目标并固定到Request；歧义或缺失父版直接拒绝，不取latest。省略`operation_type`时沿用兼容行为：有parent即编辑，无parent即新生成。
 
