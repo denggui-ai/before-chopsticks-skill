@@ -172,6 +172,20 @@ class ResolveRequirementsTests(unittest.TestCase):
         self.assertEqual((state, changes), before)
 
 
+    def test_orientation_only_request_replaces_explicit_parent_ratio(self):
+        # "Landscape" alone is user_explicit; the concrete ratio is noted as a design choice in the value.
+        parent = requirement("ratio", "4:5", 1, key="aspect_ratio", scope_kind="work", scope_id="w")
+        change = requirement("landscape", "横幅（具体16:9为设计选择）", 2, key="aspect_ratio",
+                             scope_kind="branch", scope_id="request-new")
+        result = self.resolve(with_parent(project(parent), parent), "v", [change])
+        self.assertEqual([r["value"] for r in result["effective_requirements"]], ["横幅（具体16:9为设计选择）"])
+        self.assertFalse(result["conflicts"])
+        # The rejected encoding: an ai_design ratio cannot replace an explicit parent ratio.
+        design = dict(change, id="design", value="16:9", source={"kind": "ai_design", "message_id": "message-2"})
+        result = self.resolve(with_parent(project(parent), parent), "v", [design])
+        self.assertEqual([r["value"] for r in result["effective_requirements"]], ["4:5"])
+
+
 class InheritRequirementsTests(unittest.TestCase):
     def test_new_subject_only_inherits_requested_subject_independent_attributes(self):
         records = [requirement("lighting", "side", 1, key="lighting"),
