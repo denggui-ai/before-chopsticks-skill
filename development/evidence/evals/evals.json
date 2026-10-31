@@ -78,6 +78,18 @@
       "case_id": "PUB13",
       "prompt": "清空当前版本的全部本地调色步骤，保留旧版本。",
       "expected_output": "明确父版后使用replace和空操作列表创建master的新版本；可重放性不足时说明降级，不调用图像服务。"
+    },
+    {
+      "id": 14,
+      "case_id": "PUB14",
+      "prompt": "你能帮我做什么？",
+      "expected_output": "在安装本 Skill 的项目中使用本 Skill，说明可直接创作或先找方向，不生成图片。"
+    },
+    {
+      "id": 15,
+      "case_id": "PUB15",
+      "prompt": "从较早的版本继续，改成横幅。",
+      "expected_output": "以该版本为父版；具体横向比例作为设计选择记录，不冒称用户指定的精确比例。"
     }
   ]
 }

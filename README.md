@@ -23,11 +23,12 @@ python3 -c 'import PIL, fcntl; print("Python 依赖可用")'
 
 将仓库中的 `development/runtime/before-chopsticks` **完整目录**复制到目标项目的 `.agents/skills/before-chopsticks`，包括其中的 `LICENSE`。如果目标已存在，先将原目录备份到其他位置，确认后再替换；不要将两个版本直接合并。
 
-安装后在目标项目打开一个新的 Codex 会话，确认会话能发现该 Skill。首次可试一句：
+安装后在目标项目打开一个新的 Codex 会话，确认会话能发现该 Skill。如未发现，检查当前工作目录是否为安装项目，再开启新会话。发现 Skill 与成功出图是不同的验证。
 
-> 红烧肉先给几个不同方向，不生图。
+两种开始方式都可以，探索不是必经步骤：
 
-预期得到几个可比较的画面方向和建议，不调用图像工具。如未发现 Skill，检查当前工作目录是否为安装项目，再开启新会话。发现 Skill 与成功出图是不同的验证。
+- **直接创作**：“来一张红烧肉，竖幅，其他你决定。”会简短说明设计后生成一张，可能消耗图像用量。
+- **先找方向**：“红烧肉先给几个不同方向，不生图。”得到几个可比较的画面方向和推荐，不调用图像工具。
 
 ## 接着怎么用
 
@@ -37,9 +38,9 @@ python3 -c 'import PIL, fcntl; print("Python 依赖可用")'
 - “看第一版。”——只查看，不改变后续编辑对象。
 - “回第一版继续。”——从第一版建立后续修改。
 
-详细步骤、升级备份、恢复与卸载见 [Markdown 使用指南](USER-GUIDE.md)；仓库也提供可下载后离线打开的 [HTML 使用指南](USER-GUIDE.html)。卸载 Skill 不会自动删除作品目录；从独立备份恢复尚未实际演练。
+两条入口的完整话术、预期结果、升级备份、恢复与卸载见 [Markdown 使用指南](USER-GUIDE.md)；仓库也提供可下载后离线打开的 [HTML 使用指南](USER-GUIDE.html)。卸载 Skill 不会自动删除作品目录；从独立备份恢复尚未实际演练。
 
-完整能力、已有验证与未验证限制见 [v13 能力清单](CAPABILITIES-v13.md)。
+完整能力、已有验证与未验证限制见 [v13 能力清单](CAPABILITIES-v13.md)。一次真实运行的过程和图片见 [案例](EXAMPLES.md)。
 
 ## 限制与隐私
 
@@ -55,4 +56,4 @@ python3 -c 'import PIL, fcntl; print("Python 依赖可用")'
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s development/evidence/tests -q
 ```
 
-开发时修改作者侧 `development/runtime` 与公共文档源，再由精确白名单导出；对公开仓库的修改需要同步回作者源，避免副本漂移。本仓库随附 [MIT 许可](LICENSE)，适用于权利人有权授权的项目内容；第三方内容适用各自许可，MIT 通知不替代第三方授权。历史研究资料不包含在候选中。
+开发时修改作者侧 `development/runtime` 与公共文档源，再由精确白名单导出；对公开仓库的修改需要同步回作者源，避免副本漂移。本仓库随附 [MIT 许可](LICENSE)，适用于权利人有权授权的项目内容；第三方内容适用各自许可，MIT 通知不替代第三方授权。案例页图片另以 CC BY 4.0 提供，见 [案例](EXAMPLES.md)。历史研究资料不包含在候选中。
