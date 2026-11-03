@@ -1,4 +1,4 @@
-"""R8.01: centred maximum crop boxes for the ratio presets documented in interaction.md."""
+"""centred maximum crop boxes for the ratio presets documented in interaction.md."""
 
 import importlib
 from pathlib import Path

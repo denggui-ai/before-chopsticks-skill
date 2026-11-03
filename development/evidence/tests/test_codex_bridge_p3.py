@@ -100,7 +100,7 @@ class CodexBridgeP3Tests(unittest.TestCase):
     def test_three_image_edit_preserves_order_and_fixed_roles_borrow_exclude(self):
         base, refs = self.three_references()
         prepared = self.prepared(parent_version_id=base['version']['id'], references=[ref['id'] for ref in refs])
-        self.assertEqual(prepared['request']['design']['native_payload_version'], 2)
+        self.assertEqual(prepared['request']['design']['native_payload_version'], 3)
         fixed_refs = copy.deepcopy(prepared['request']['references'])
         # A caller's mutable returned copy cannot replace immutable Request roles.
         prepared['request']['references'][0]['roles'][0]['borrow'] = 'POISON_RETURNED_COPY'
