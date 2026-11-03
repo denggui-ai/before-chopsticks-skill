@@ -25,6 +25,27 @@ def _nonempty(value, label):
     return copy.deepcopy(value)
 
 
+def _validate_input_policy(policy, operation, references, explicit_ids, parent_asset_id=None):
+    if policy not in ('legacy_edit', 'explicit_scope'):
+        raise StateError('input_policy must be legacy_edit or explicit_scope')
+    if policy == 'legacy_edit':
+        return
+    if operation != 'generative_edit':
+        raise StateError('explicit_scope requires generative_edit')
+    bases = [(reference, role) for reference in references for role in reference['roles']
+             if role['role'] == 'base_image']
+    if len(bases) != 1 or bases[0][0]['id'] not in explicit_ids:
+        raise StateError('explicit_scope requires exactly one explicit base-image reference')
+    reference, role = bases[0]
+    if parent_asset_id is not None and reference['asset_id'] != parent_asset_id:
+        raise StateError('explicit base image must match the parent version')
+    if (not isinstance(role['borrow'], str) or not role['borrow'].strip()
+            or role['borrow'].strip().casefold() == 'editable image'
+            or not isinstance(role['exclude'], list) or not role['exclude']
+            or not all(isinstance(value, str) and value.strip() for value in role['exclude'])):
+        raise StateError('explicit_scope base image requires specific borrow text and nonempty textual exclusions')
+
+
 def native_capabilities(interface_evidence):
     return {
         'schema_version': 1, 'adapter_id': ADAPTER_ID, 'observed_at': utc_now(),
@@ -106,8 +127,12 @@ class CodexBridge:
 
     def _arguments(self, request, inputs):
         version = request['design'].get('native_payload_version', 1)
-        if version not in (1, 2):
+        if version not in (1, 2, 3):
             raise StateError('unknown native payload version')
+        # Versions 1/2 are frozen: saved calls must remain exactly reconstructible.
+        policy = request['design'].get('input_policy') if version == 3 else 'legacy_edit'
+        _validate_input_policy(policy, request['operation']['type'], request['references'],
+                               request.get('reference_ids', []))
         effective = [{'key': r['key'], 'value': r['value']} for r in request['effective_requirements']]
         prompt = ('Create exactly one image.\n' + request['design']['native_prompt'] +
                   '\nCurrent resolved requirements (authoritative over older design wording):\n' +
@@ -118,11 +143,24 @@ class CodexBridge:
             if version == 1:
                 arguments['prompt'] += '\nThe single attached image is the edit target; preserve its content except for the requested changes.'
             else:
-                lines = ['Image roles in the exact attached order. Borrow only the named attributes; exclusions must not be carried into the output.']
+                if policy == 'explicit_scope':
+                    lines = ['Image roles in the exact attached order. Borrow only the named attributes. '
+                             'Current explicit user locks take priority.']
+                else:
+                    lines = ['Image roles in the exact attached order. Borrow only the named attributes; exclusions must not be carried into the output.']
                 for index, reference in enumerate(request['references'], 1):
                     base = any(role['role'] == 'base_image' for role in reference['roles'])
-                    lines.append(f'Image {index}: ' + ('main edit target; preserve content except the requested changes.'
-                                                       if base else 'supporting reference, not another edit target.'))
+                    if policy == 'explicit_scope' and base:
+                        description = ('main edit source; preserve only the named borrowed attributes and '
+                                       'current explicit user locks. Redesign other aspects according to the current design. '
+                                       'Base-image exclusions mean do not inherit those source attributes; '
+                                       'they are not bans on objects in the new scene.')
+                    else:
+                        description = ('main edit target; preserve content except the requested changes.'
+                                       if base else 'supporting reference, not another edit target.')
+                        if policy == 'explicit_scope':
+                            description += ' Excluded supporting-reference attributes must not be carried into the output.'
+                    lines.append(f'Image {index}: ' + description)
                     for role in reference['roles']:
                         description = {'role': role['role'], 'borrow': role['borrow'],
                                        'exclude': role['exclude'], 'strength': role['strength']}
@@ -132,7 +170,7 @@ class CodexBridge:
 
     def prepare(self, work_id, authorization_id, prompt, parent_version_id=None,
                 changes=(), transparent_background=None, references=(), group_id=None,
-                item_id=None, begin_context=True, operation_type=None):
+                item_id=None, begin_context=True, operation_type=None, input_policy='legacy_edit'):
         if not isinstance(prompt, str) or not prompt.strip():
             raise StateError('native prompt is required')
         if transparent_background is not None and type(transparent_background) is not bool:
@@ -140,6 +178,10 @@ class CodexBridge:
         kind = operation_type or ('generative_edit' if parent_version_id else 'generate')
         if kind not in ('generate', 'generative_edit'):
             raise StateError('unsupported native operation')
+        if input_policy not in ('legacy_edit', 'explicit_scope'):
+            raise StateError('input_policy must be legacy_edit or explicit_scope')
+        if input_policy == 'explicit_scope' and kind != 'generative_edit':
+            raise StateError('explicit_scope requires generative_edit')
         if not isinstance(references, (list, tuple)) or not all(isinstance(r, str) for r in references):
             raise StateError('references must be an ordered list of Reference IDs')
         if len(set(references)) != len(references):
@@ -164,6 +206,12 @@ class CodexBridge:
                 if parent['work_id'] != work_id:
                     raise StateError('parent version belongs to another work')
                 alpha = state['assets'][parent['asset_id']]['media_info']['has_alpha']
+                if input_policy == 'explicit_scope':
+                    if any(reference_id not in state['references'] for reference_id in references):
+                        raise StateError('explicit reference does not exist')
+                    _validate_input_policy(input_policy, kind,
+                                           [state['references'][reference_id] for reference_id in references],
+                                           references, parent['asset_id'])
             transparent = alpha if transparent_background is None else transparent_background
             return self.engine._prepare_locked(
                 state, work_id, authorization_id, ADAPTER_ID, native_capabilities(self.interface_evidence),
@@ -171,7 +219,8 @@ class CodexBridge:
                            'edit_mode': 'semantic_reference_edit' if kind == 'generative_edit' else None},
                 parent_version_id=parent_version_id, changes=changes,
                 references=references, group_id=group_id, item_id=item_id, begin_context=begin_context,
-                design={'native_prompt': prompt, 'transparent_background': transparent, 'native_payload_version': 2},
+                design={'native_prompt': prompt, 'transparent_background': transparent,
+                        'native_payload_version': 3, 'input_policy': input_policy},
             )
 
     def _plan(self, project, attempt, request):
@@ -202,7 +251,7 @@ class CodexBridge:
             path = self.engine._asset_path(project, asset['id'])
             entry = {'asset_id': asset['id'], 'path': str(path), 'sha256': asset['sha256'],
                      'roles': copy.deepcopy(reference['roles'])}
-            if version == 2:
+            if version in (2, 3):
                 entry['reference_id'] = reference['id']
             inputs.append(entry)
             mapping.append({'tool_index': index, 'reference_id': reference['id'], 'asset_id': asset['id']})

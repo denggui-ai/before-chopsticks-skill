@@ -1,6 +1,8 @@
 # v13 能力清单（2026-10-31）
 
-本清单说明v13开发候选的运行入口、已有验证及限制，对应提交 `e2adb06`；此后的改动见 [CHANGELOG](CHANGELOG.md)，目前只有一条画幅记录规则和一项对应离线回归。运行文件位于仓库的 `development/runtime/before-chopsticks`，具体安装见 [README](README.md)。v13本身不证明已部署到使用者环境，也不代表production-ready。
+> 照片入口后续修订（2026-10-31，本地候选，待实图验证）：创作先策划每张的故事作用、空间关系与拍法，再用显式原图角色记录身份和锁定范围；桥接新增 `input_policy=explicit_scope`，普通编辑沿用默认 `legacy_edit`，历史调用保持原版本恢复。样张同时检查身份、锁定、重构、故事作用与食物状态。此次输入策略已有合成夹具契约验证（包括旧请求恢复），仍需真实图像执行及实图验证，不能用历史 164 项离线回归或旧单节点图像对照替代；既有实图存在身份、机位、数量偏差，完整多阶段效果未通过。只调色误走生成的已知问题仍保留。
+
+本清单说明v13开发候选的运行入口、已有验证及限制，对应提交 `e2adb06`；此后的候选改动与验证边界见 [CHANGELOG](CHANGELOG.md) 及本页顶部说明。运行文件位于仓库的 `development/runtime/before-chopsticks`，具体安装见 [README](README.md)。v13本身不证明已部署到使用者环境，也不代表production-ready。
 
 **已有验证**分为离线程序/像素检查、模型实际读取后的文字行为、真实图像案例。较早版本的实图与安装记录只在原案例及版本范围内有效；v9/v10/v11文字回归不能拼接成v13完整端到端通过。下表E1—E10为验证摘要编号，文末解释范围；私有原始证据、用户作品和原始调用记录不随本清单提供，未公开的验证摘要不等于读者已能独立复核全部实验。
 
@@ -32,6 +34,7 @@
 | 多菜独立与换菜继承 | [interaction](development/runtime/before-chopsticks/references/core/interaction.md)「创意探索与图组选择」；[state](development/runtime/before-chopsticks/references/core/state.md)「候选标签与换菜」 | E5三菜独立场景文字；E7要求/锚点隔离回归；E9原换菜实测范围 | 不强制统一场景；不证明任意多菜一轮自动完成；只继承点名且不依赖旧主体的条件 |
 | 统一视觉系列与过程叙事系列 | [photography](development/runtime/before-chopsticks/references/core/photography.md)「候选与系列」；[state](development/runtime/before-chopsticks/references/core/state.md)「系列锚点与依赖」 | E2真实八张系列；E9锚点引用及按项依赖修复范围通过；E7相关离线回归 | 张数不固定；镜头、份量、人物和空间连续性未普遍稳定；不把有限系列接受扩大到全部系列 |
 | 参考角色、借鉴/排除及输入顺序 | [interaction](development/runtime/before-chopsticks/references/core/interaction.md)参考规则；[state](development/runtime/before-chopsticks/references/core/state.md)「要求、参考与检查」；[codex](development/runtime/before-chopsticks/references/hosts/codex.md) | E8真实三参考场景修正部分满足；E7角色映射、哈希、缺失输入和锚点绑定回归 | 本适配器编辑最多三张含主底图，新生成不带参考；语义属性解耦不保证，不能称像素保护 |
+| 照片创作的原图借用范围 | [intake](development/runtime/before-chopsticks/references/core/intake.md)「原图借用范围」；[codex](development/runtime/before-chopsticks/references/hosts/codex.md)「原图解释策略」 | 候选新增 `explicit_scope`，使用现有显式主图 Reference；合成夹具覆盖输入校验、固定参数与旧请求恢复；程序、自然请求与实图结果分开记录 | 不新增图像服务能力；不保证消除原构图影响，样张身份相似不能代替重构和故事效果通过 |
 | 按范围更新要求与保留条件 | [state](development/runtime/before-chopsticks/references/core/state.md)「要求、参考与检查」；`requirements.py` | E3有比例替换且暗调/主体保留的离线夹具；E7要求归并、分支与冲突回归 | 规则解析通过不等于最终图像满足；冲突只阻塞受影响对象，不自动丢掉保留项 |
 | 授权、原生生成与语义编辑 | [SKILL](development/runtime/before-chopsticks/SKILL.md)；[codex](development/runtime/before-chopsticks/references/hosts/codex.md)；`scripts/codex.py` | E1真实生成1次、编辑1次；E9后续本地首版有限调用；E7执行/额度边界回归 | 真正调用由宿主执行，CLI只准备/归档；尺寸/费用unknown；工具可用性须按当次声明，不保证完整新会话自动出图 |
 | 回执归档、中断恢复与防重发 | [codex](development/runtime/before-chopsticks/references/hosts/codex.md)「真实回执与输出」「中断恢复」；[state](development/runtime/before-chopsticks/references/core/state.md)「外部执行接口与恢复」 | E1真实回执落盘后进程退出、重启接纳与二次恢复幂等；E7崩溃窗口/unknown/晚到结果回归 | 仅本地可证明恢复；远程未返回或无回执仍unknown，不自动重发；无远程query/cancel或恰好一次保证 |
@@ -57,7 +60,7 @@
 - **E4｜v9/v10文字回归**：有限任务覆盖影调、改光描述、过程规划、缺图点评和提交遗漏归因；有实际技能读取，不代表隐式发现或新成图验证。
 - **E5｜v11文字回归**：一次隔离会话完成四方向、故事与光混选且去手、三菜独立场景、手机加左窗指导四项任务；不是四次独立会话。
 - **E6｜改光实图复测**：主体受光有改善，整图投影一致性仍记为部分达到/不确定，不升级为整体通过。
-- **E7｜v13离线回归**：整套146项通过，含两项新增清空操作与输入拒绝回归；146不是表中每项各有146例。`751070f` 新增一项画幅方向记录回归，当前共147项。仓库保留可运行的[测试目录](development/evidence/tests)，其中有[状态与版本测试](development/evidence/tests/test_engine.py)、[本地修图测试](development/evidence/tests/test_local_edits.py)、[锚点绑定测试](development/evidence/tests/test_anchor_binding.py)。运行方式见README；测试使用合成夹具，不调用图像服务。评测定义本身不算执行结果。
+- **E7｜v13离线回归**：整套146项通过，含两项新增清空操作与输入拒绝回归；146不是表中每项各有146例。`751070f` 新增一项画幅方向记录回归，该历史版本共147项；照片入口增加11项、后续模式切换等增加6项时，该历史版本离线回归共164项；不将该数量视为本次输入策略的验证结果。仓库保留可运行的[测试目录](development/evidence/tests)，其中有[状态与版本测试](development/evidence/tests/test_engine.py)、[本地修图测试](development/evidence/tests/test_local_edits.py)、[锚点绑定测试](development/evidence/tests/test_anchor_binding.py)。运行方式见README；测试使用合成夹具，不调用图像服务。评测定义本身不算执行结果。
 - **E8｜三参考场景修正**：指定背景、台面有所改善，但道具材质仍有违例；参考解耦只部分满足。
 - **E9｜较早本地首版限定验收**：包含有限光色、编辑、点评与实拍指导、锚点隔离、分层检查，以及安装后使用和原目录移回恢复。新建和编辑各有一次画幅/影调正式无图准备；独立备份恢复未演练。这些不算v13新安装验收。
 - **E10｜较早正式无图准备**：单次新会话自然发现、读取技能并实际执行prepare/preview；止于准备，没有dispatch或原生图像调用。

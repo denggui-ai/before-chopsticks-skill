@@ -10,11 +10,24 @@
 
 适配器ID为`codex-native-imagegen-v1`。当前能力声明的编辑输入上限3（含一个主底图）、单次输出上限1是本适配器范围，不是原生服务最大值；尺寸与费用保持unknown。编辑只是语义参考编辑，不提供精确像素或区域mask保护。此接口未暴露远程查询/取消，适配器不支持这两项。`functions.wait`只等待当前工具调用返回，不是查询远程job。
 
-辅助参考先经核心`add_reference`记录角色、`borrow/exclude/strength/source`及作用范围，再将Reference ID有序传入`prepare.references`。桥把实际输入顺序和每个角色的借鉴/排除条件写入固定提示词与`input_reference_map`，不丢图、不扩大借鉴范围。若未显式提供主底图Reference，核心由父版补入，仍计入三张上限；支持输入这些语义不代表模型已稳定隔离各参考属性。
+参考先经核心`add_reference`记录角色、`borrow/exclude/strength/source`及作用范围，再将Reference ID有序传入`prepare.references`。主图也可登记显式 `base_image` Reference，其 asset 必须对应父版。桥把实际输入顺序和每个角色的借鉴/排除条件写入固定提示词与`input_reference_map`，不丢图、不扩大借鉴范围。默认策略未显式提供主图时，核心由父版补入，仍计入三张上限；支持输入这些语义不代表模型已稳定隔离各参考属性。
+
+### 原图解释策略（候选，效果待实图验证）
+
+`prepare.input_policy` 固定本次如何使用原图，不是新的操作类型，也不从“画面来源”或提示词关键词推断：
+
+| 值 | 行为 |
+|---|---|
+| `legacy_edit`（默认） | 除指定修改外保留原内容；适用于普通编辑和对选定成图的局部修正。仍允许明确要求的机位、光线和环境变化。 |
+| `explicit_scope` | 只继承显式 `base_image.borrow` 与当前有效要求中的身份及锁定项，其余按新设计处理；不追加通用保留原内容的指令。仅在镜头选用原图编辑且要整幅重新策划时使用，不要求每次初创都以原图为父版。 |
+
+`explicit_scope` 仅用于 `generative_edit`。先对父版 asset 调 `add_reference`，写具体、非空的 `borrow` 和 `exclude`，角色 `base_image`、强度 `required`、来源按实际，再随 `prepare.references` 提交该 ID。`borrow` 不能只写 `editable image`；应点名本阶段可核对身份和锁定项。主图 `exclude` 表示不继承原图的这些属性、按当前设计重新处理，不表示输出禁止出现器皿、台面等对象。用户锁定的项不能列为排除。缺失显式主图、重复主图、与父版不匹配、非法策略或给 `generate` 传 `explicit_scope` 都须停止处理，不以自动补入的底图兜底。
+
+新请求保存 payload v3 与策略；v1/v2 历史请求仍按原版本重建参数和恢复回执，不改写旧调用。策略和角色只能约束提交内容，不能保证图像模型遵循或干净分离原图属性。
 
 ## 准备、查看与调用
 
-项目/Work/授权先按[state.md](../core/state.md)建立；授权渠道须包含本适配器ID，操作为generate或generative_edit。用户本轮要一张图只授权一张；不因测试、改ID或unknown额外生成。已明确授权持续有效，不重复询问。
+项目/Work/授权先按[state.md](../core/state.md)建立；授权渠道须包含本适配器ID，操作为generate或generative_edit。用户本轮要一张图只授权一张；不因测试、改ID或unknown额外生成。方案批准与额度复用按[intake.md](../core/intake.md)“方案表达”和“授权与张数”判断。
 
 本地命令统一为：
 

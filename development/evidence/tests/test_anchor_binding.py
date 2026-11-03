@@ -133,3 +133,96 @@ class AnchorBindingTests(unittest.TestCase):
         self.engine.set_series_anchor(self.group['id'], self.b['id'], ['color'])
         self.assertEqual(self.dispatch(p)['status'], 'blocked')
 
+    def test_style_only_narrative_anchor_borrows_light_and_color_without_material(self):
+        self.fixtures()
+        group = self.engine.create_group([self.work] * 2, kind='narrative_series')
+        item = group['item_ids'][1]
+        self.engine.set_series_anchor(group['id'], self.a['id'], ['lighting', 'color'])
+        roles = [
+            {'role': 'lighting', 'borrow': 'soft warm light character',
+             'exclude': ['light direction', 'tabletop', 'props', 'camera angle', 'food'],
+             'strength': 'preferred', 'source': {'kind': 'ai_design'}},
+            {'role': 'color', 'borrow': 'neutral warm color tendency',
+             'exclude': ['tabletop', 'props', 'food'],
+             'strength': 'preferred', 'source': {'kind': 'ai_design'}},
+        ]
+        ref = self.engine.add_reference(self.a['asset_id'], roles, scope={'kind': 'group', 'id': group['id']})
+        self.engine.set_item_anchor(group['id'], item, [ref['id']])
+        prepared = self.bridge.prepare(self.work, self.authid, 'Redesign this stage independently.',
+            parent_version_id=self.b['id'], group_id=group['id'], item_id=item, references=[ref['id']])
+        plan = self.bridge.preview(prepared['attempt']['id'])
+        self.assertEqual(len(plan['inputs']), 2)
+        anchor = prepared['request']['references'][-1]
+        self.assertEqual(anchor['roles'], roles)
+        self.assertEqual(plan['inputs'][-1]['asset_id'], self.a['asset_id'])
+        material = self.engine.add_reference(self.a['asset_id'], [
+            {**roles[0], 'role': 'material', 'borrow': 'tabletop'}], scope={'kind': 'group', 'id': group['id']})
+        with self.assertRaises(StateError):
+            self.engine.set_item_anchor(group['id'], item, [material['id']])
+
+    def test_story_design_and_scoped_scene_reach_same_scene_and_transition_requests(self):
+        self.fixtures()
+        group = self.engine.create_group([self.work] * 3, kind='narrative_series')
+        same_scene, transition = group['item_ids'][1:]
+        story = 'Prepare at the kitchen counter, then carry the meal to a dining table.'
+        self.engine.add_requirements(
+            [{'key': '组级故事设计', 'value': story, 'source': {'kind': 'ai_design'}}],
+            {'kind': 'group', 'id': group['id']}, message_id='offline-story-plan')
+        self.engine.add_requirements(
+            [{'key': '厨房连续条件', 'value': 'left window and charcoal counter',
+              'source': {'kind': 'ai_design'}}],
+            {'kind': 'group', 'id': group['id'], 'item_ids': [same_scene]},
+            message_id='offline-story-plan')
+        self.engine.set_series_anchor(group['id'], self.a['id'], ['continuity', 'color'])
+        scene_roles = [{'role': 'continuity',
+                        'borrow': 'left window, charcoal counter, cream sleeves',
+                        'exclude': ['old pose', 'old camera angle', 'finished food'],
+                        'strength': 'required', 'source': {'kind': 'ai_design'}}]
+        transition_roles = [{'role': 'color', 'borrow': 'restrained warm palette',
+                             'exclude': ['kitchen counter', 'kitchen layout', 'old pose', 'food'],
+                             'strength': 'preferred', 'source': {'kind': 'ai_design'}}]
+        references = {}
+        for item, roles in ((same_scene, scene_roles), (transition, transition_roles)):
+            ref = self.engine.add_reference(self.a['asset_id'], roles,
+                scope={'kind': 'item', 'id': item})
+            references[item] = ref['id']
+            self.engine.set_item_anchor(group['id'], item, [ref['id']])
+        base = self.engine.add_reference(self.b['asset_id'], [{
+            'role': 'base_image', 'borrow': 'handmade open buns with broad folds',
+            'exclude': ['original camera angle', 'original table'], 'strength': 'required',
+            'source': {'kind': 'user_implied_edit_preservation'}}],
+            scope={'kind': 'group', 'id': group['id']})
+        for item, task, roles in (
+                (same_scene, 'Hands finish folding at the same kitchen counter.', scene_roles),
+                (transition, 'A hand sets the plate on the new dining table.', transition_roles)):
+            prepared = self.bridge.prepare(self.work, self.authid, story + ' ' + task,
+                parent_version_id=self.b['id'], group_id=group['id'], item_id=item,
+                references=[base['id'], references[item]], input_policy='explicit_scope',
+                changes=[{'key': '本张叙事任务', 'value': task, 'source': {'kind': 'ai_design'}}])
+            self.assertEqual(prepared['status'], 'prepared')
+            effective = {r['key']: r['value'] for r in prepared['request']['effective_requirements']}
+            self.assertEqual(effective['组级故事设计'], story)
+            self.assertEqual(effective['本张叙事任务'], task)
+            self.assertEqual('厨房连续条件' in effective, item == same_scene)
+            preview = self.bridge.preview(prepared['attempt']['id'])
+            self.assertIn(story, preview['arguments']['prompt'])
+            self.assertIn(task, preview['arguments']['prompt'])
+            self.assertEqual(preview['inputs'][0]['asset_id'], self.b['asset_id'])
+            self.assertEqual(preview['inputs'][1]['asset_id'], self.a['asset_id'])
+            self.assertEqual(preview['inputs'][1]['roles'], roles)
+            self.assertEqual(prepared['attempt']['submission'], 'not_submitted')
+
+    def test_text_generation_can_use_logical_anchor_without_sending_images(self):
+        self.fixtures()
+        self.engine.set_item_anchor(self.group['id'], self.item, [])
+        auth = self.engine.authorize([self.work], ['generate'], 1,
+            paid_channel_scope=[ADAPTER_ID], evidence={'fixture': 'offline text fallback'})['id']
+        prepared = self.bridge.prepare(self.work, auth, 'Rebuild by dish name; soft warm light.',
+            operation_type='generate', group_id=self.group['id'], item_id=self.item)
+        self.assertEqual(prepared['status'], 'prepared')
+        self.assertIsNone(prepared['request']['parent_version_id'])
+        self.assertEqual(prepared['request']['references'], [])
+        plan = self.bridge.preview(prepared['attempt']['id'])
+        self.assertEqual(plan['inputs'], [])
+        self.assertNotIn('referenced_image_paths', plan['arguments'])
+        self.assertNotIn('num_last_images_to_include', plan['arguments'])

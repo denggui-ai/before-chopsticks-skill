@@ -73,6 +73,25 @@ Reference的`scope`支持`project/work/group/item`及对应`id`，也可用`item
 
 `record_check`接受`version_id,category,status,evidence,note?`，保存独立检查记录；category为artifact_integrity/requirement_checks/visual_observations/encoding_check，status为pass/fail/unclear/not_applicable。evidence必须有内容且可追溯。检查与用户选择分开，选版不把fail改成pass。
 
+## 作品记录（四件事共用）
+
+针对已明确菜或作品的创作、修改、建议与加字需求维护同一作品记录，交付后更新，续作先读取。新菜建新 Work；纯泛问或尚未确认菜名时不强建项目。优先使用现有字段和不可变记录，不手改快照、不新增状态字段：
+
+| 内容 | 现有承载与读取依据 |
+|---|---|
+| 作品与版本 | Work、Version、Asset、稳定数字／字母标签及父版链保存每张编号、来源、可回看版本；`画面来源` 读目标 Version 有效要求。技术状态读 Attempt，检查读 `record_check`；已认可／待重拍／有问题和用户评价用下述文字摘要保留，不把用户认可改写成检查通过 |
+| 约束 | `add_requirements` 或本次 `prepare.changes` 保存保留项、菜身份、明确偏好，来源与 scope 如实；原图条件档位、已提醒事项及尚未支持的加字内容写文字摘要，不伪称已有专用字段 |
+| 策划 | 完整脚本和执行对应写现有 Request `design`；已用拍法、场景、生活命题、人物关系、动作链及用户对上一套的评价写文字摘要，续作人工对照去重 |
+| 本轮决定 | 主参考、保原图或重拍、参考作用范围保存在需求、Reference roles/scope 与 Request 的父版、references、input_policy 中；没有专用字段的决策理由补入文字摘要 |
+
+计数另按现有 Authorization 的总授权与 Attempt 的执行事实对账，记录已用、本次计划、未知占用；失败、重做与未知调用不得漏账。相同问题已尝试的方法与失败次数须在文字摘要中连贯保留，不能仅凭新 Version 重新起算。
+
+文字摘要放在现有 Request `design` 可保存的文字中：有执行请求时随该请求保存；仅建议、未执行方案或加字需求可用 `record_read_only` 的适用 intent（explore／critique／shoot_guidance）保存说明，`attempt:null`，不伪造生成请求。摘要按作品或组逐张关联稳定编号、版本和引用的真实消息；新摘要明确承接哪个旧记录，保留原文与版本链，不覆盖旧事实。续作从 `project.request_ids` 读取相关 Request，先核当前素材和已认可来源，再人工核对摘要；缺记录就明确缺口，不假装自动检索或持久化已实现。
+
+加字回复及记录告知统一按[intake.md](intake.md)“路由”；记录须保存原文字、对象、logo／版式等范围和“暂不支持”状态。若尚无可建作品的对象，先在当前对话记录，不凭空建菜。作品来源与用户私有素材不得随公开说明外传；面向用户的介绍及提示词使用独立的具体画面描述，不引用研究来源的作者、品牌、出版物、标志口号或内部项目名来命名风格。
+
+以上为现有容器中的文字记录要求，不是新增结构化状态或自动去重能力。原图档位、提醒标志、已用命题索引、逐张用户认可状态、问题次数的专用字段与自动校验尚未实现；如必须靠引擎保证，停该自动化项并报批，不自行改 `scripts/` 或拆文件。
+
 ## 外部执行接口与恢复
 
 以下是共同核心的持久化接口。Codex原生调用使用已接入的[Codex图像桥](../hosts/codex.md)准备参数与保存真实回执；这些核心方法本身不调用模型。
