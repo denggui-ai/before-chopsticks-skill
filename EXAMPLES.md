@@ -217,4 +217,4 @@ V1 ─┬─ V2  背景简化、减黄（生成式编辑）
 
 以上图片均缩放并压缩为 JPEG。
 
-**生成与修改的图片（输出）**：`examples/` 中其余图片由 Codex 原生图像工具生成或编辑，不适用仓库代码的 MIT 许可，在权利人可授权的范围内以 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh-hans) 提供。转载或改编时请署名“before-chopsticks-skill 案例图”，并附本仓库链接。其中由上述输入照片修改而来的图片（牛肉面 V2、V3，煎饺结果），转载时还须同时署名原照片作者并注明原许可。
+**生成与修改的图片（输出）**：`examples/` 中其余图片由 Codex 原生图像工具生成或编辑，不适用仓库代码的 MIT 许可，在权利人可授权的范围内以 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh-hans) 提供。转载或改编时请署名“before-chopsticks-skill 案例图”，并附本仓库链接。其中由上述输入照片修改而来的图片（牛肉面 V2、V3，煎饺结果），以及 README 首屏拼图 `examples/hero.jpg`（直接包含牛肉面、小炒两张原照片：Berthe，CC BY 3.0；Wheeler Cowperthwaite，CC BY 2.0），转载时还须同时署名原照片作者并注明原许可。

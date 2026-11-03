@@ -4,6 +4,8 @@
 
 ![随手拍修成能发的图；一张照片拍成一顿饭的故事](examples/hero.jpg)
 
+<sub>每行最左为输入照片，来自 Wikimedia Commons（Berthe，CC BY 3.0；Wheeler Cowperthwaite，CC BY 2.0），其余为 Skill 输出；来源与许可见[案例页](EXAMPLES.md#图片来源与许可)。</sub>
+
 **看效果**：[7 个真实运行案例](EXAMPLES.md)，覆盖修图、套图、无图创作、只改一张、再来一套、借参考光色、只发图时的点评，以及和“一句话直接生图”的对比。
 
 ## 三步开始
